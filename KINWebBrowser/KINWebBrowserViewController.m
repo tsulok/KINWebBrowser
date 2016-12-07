@@ -91,32 +91,43 @@ static void *KINWebBrowserContext = &KINWebBrowserContext;
 - (id)initWithConfiguration:(WKWebViewConfiguration *)configuration {
     self = [super init];
     if(self) {
-        if([WKWebView class]) {
-            if(configuration) {
-                self.wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
-            }
-            else {
-                self.wkWebView = [[WKWebView alloc] init];
-            }
-        }
-        else {
-            self.uiWebView = [[UIWebView alloc] init];
-        }
-        
-        self.actionButtonHidden = NO;
-        self.showsURLInNavigationBar = NO;
-        self.showsPageTitleInNavigationBar = YES;
-        
-        self.externalAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Leave this app?" message:@"This web page is trying to open an outside app. Are you sure you want to open it?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Open App", nil];
-        
+        [self configureComponent:configuration];
     }
     return self;
+}
+
+- (void)configureComponent:(WKWebViewConfiguration *)configuration {
+    
+    // If any of the views are configured, do nothing
+    if (self.wkWebView || self.uiWebView) {
+        return;
+    }
+    
+    if([WKWebView class]) {
+        if(configuration) {
+            self.wkWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:configuration];
+        }
+        else {
+            self.wkWebView = [[WKWebView alloc] init];
+        }
+    }
+    else {
+        self.uiWebView = [[UIWebView alloc] init];
+    }
+    
+    self.actionButtonHidden = NO;
+    self.showsURLInNavigationBar = NO;
+    self.showsPageTitleInNavigationBar = YES;
+    
+    self.externalAppPermissionAlertView = [[UIAlertView alloc] initWithTitle:@"Leave this app?" message:@"This web page is trying to open an outside app. Are you sure you want to open it?" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Open App", nil];
 }
 
 #pragma mark - View Lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [self configureComponent:nil];
     
     self.previousNavigationControllerToolbarHidden = self.navigationController.toolbarHidden;
     self.previousNavigationControllerNavigationBarHidden = self.navigationController.navigationBarHidden;
@@ -405,7 +416,7 @@ static void *KINWebBrowserContext = &KINWebBrowserContext;
 }
 
 - (void)setupToolbarItems {
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSBundle *bundle = [NSBundle bundleForClass:[KINWebBrowserViewController class]];
     
     self.refreshButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshButtonPressed:)];
     self.stopButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(stopButtonPressed:)];
